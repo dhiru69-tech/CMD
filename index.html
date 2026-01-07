@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kali Linux: Basic Commands & Recon Guide</title>
+    <style>
+        /* CORE TERMINAL STYLING */
+        :root {
+            --bg-color: #0b0b0b;
+            --text-color: #e0e0e0;
+            --prompt-user: #ff5555; /* Kali Root Red */
+            --prompt-path: #5555ff; /* Kali Path Blue */
+            --cmd-color: #ffffff;
+            --comment-color: #828282;
+            --green: #00ff00;
+            --font-stack: 'Fira Code', 'Source Code Pro', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            font-size: 16px;
+            line-height: 1.4;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* TERMINAL CONTAINER */
+        #terminal {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 50px; /* Space for fixed status bar if needed */
+        }
+
+        /* SCROLLBAR STYLING (Webkit) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        /* TERMINAL ELEMENTS */
+        .line {
+            display: block;
+            margin-bottom: 2px;
+            word-wrap: break-word;
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+
+        .prompt-line {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .prompt-text {
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+        
+        .user { color: var(--prompt-user); font-weight: bold; }
+        .at { color: var(--text-color); }
+        .host { color: var(--text-color); font-weight: bold; }
+        .path { color: var(--prompt-path); font-weight: bold; }
+        .symbol { color: var(--text-color); }
+
+        .command-text {
+            color: var(--cmd-color);
+            font-weight: bold;
+        }
+
+        .output {
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .comment {
+            color: var(--comment-color);
+            font-style: italic;
+            display: block;
+            margin-top: 5px;
+            border-left: 2px solid var(--comment-color);
+            padding-left: 10px;
+        }
+
+        /* SPECIAL OUTPUT STYLES */
+        .highlight { color: var(--green); }
+        .error { color: #ff5555; }
+        .directory { color: #5555ff; font-weight: bold; }
+        .executable { color: #55ff55; font-weight: bold; }
+        
+        /* IMAGE MOCKUP (ASCII/CSS BOX) */
+        .img-mock {
+            border: 1px dashed #444;
+            background: #111;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #aaa;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        /* CURSOR BLINK */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: #ccc;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+
+        .cursor.typing {
+            animation: none;
+            opacity: 1;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* STATUS BAR */
+        #status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a1a1a;
+            color: #888;
+            padding: 5px 20px;
+            font-size: 12px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="terminal">
+        <!-- Lines will be injected here via JS -->
+        <div class="line output">
+            Kali Linux Training Environment [Version 2026.1]
+            <br>
+            (c) Security Training Corp. All rights reserved.
+            <br><br>
+            Loaded: <span class="highlight">Kali_Basic_Commands_and_Recon_Complete_Guide.pdf</span>
+        </div>
+    </div>
+
+    <div id="status-bar">
+        <span>MODE: INTERACTIVE PRESENTATION</span>
+        <span>[SPACE] Next Step &nbsp;|&nbsp; [ENTER] Auto-Complete</span>
+    </div>
+
+<script>
+    /**
+     * KALI LINUX TERMINAL ENGINE
+     * Simulates a real terminal environment for educational presentation.
+     */
+
+    const terminal = document.getElementById('terminal');
+    let isTyping = false;
+    let currentStepIndex = 0;
+    let currentTypingTimeout = null;
+    let autoPlay = false;
+
+    // AUDIO CONTEXT (Optional realism, kept silent per requirements)
+    // No Audio.
+
+    /**
+     * CONTENT DATA
+     * Based on the PDF provided.
+     * Types: 
+     * - command: types out a command
+     * - output: raw html output
+     * - clear: clears terminal
+     * - comment: explanation text
+     */
+    const content = [
+        {
+            type: 'comment',
+            text: "Welcome to the Kali Linux Basic Commands & Reconnaissance Guide.\nPress SPACE to execute commands."
+        },
+        // --- PART 1: BASICS ---
+        { type: 'comment', text: "PART 1: BASIC LINUX COMMANDS\nLet's start with navigation and file management." },
+        { 
+            type: 'command', 
+            cmd: 'pwd', 
+            path: '~',
+            output: '/root' 
+        },
+        { type: 'comment', text: "PWD (Print Working Directory): Shows your current path." },
+        { 
+            type: 'command', 
+            cmd: 'ls -la', 
+            path: '~',
+            output: `total 48
+drwxr-xr-x 1 root root 4096 Jan 07 10:00 <span class="directory">.</span>
+drwxr-xr-x 1 root root 4096 Jan 07 10:00 <span class="directory">..</span>
+-rw------- 1 root root 1204 Jan 07 09:55 .bash_history
+-rw-r--r-- 1 root root 3106 Oct 15  2024 .bashrc
+drwxr-xr-x 1 root root 4096 Jan 07 09:30 <span class="directory">Downloads</span>
+drwxr-xr-x 1 root root 4096 Jan 07 09:30 <span class="directory">Desktop</span>
+-rw-r--r-- 1 root root   24 Jan 07 10:00 <span class="executable">recon_script.sh</span>`
+        },
+        { type: 'comment', text: "LS (List): Lists files. '-la' shows hidden files and details." },
+        { 
+            type: 'command', 
+            cmd: 'mkdir test_folder', 
+            path: '~',
+            output: '' 
+        },
+        { type: 'comment', text: "MKDIR (Make Directory): Creates a new folder named 'test_folder'." },
+        { 
+            type: 'command', 
+            cmd: 'cd test_folder', 
+            path: '~',
+            output: '' 
+        },
+        { 
+            type: 'command', 
+            cmd: 'pwd', 
+            path: '~/test_folder',
+            output: '/root/test_folder' 
+        },
+        { type: 'comment', text: "CD (Change Directory): Moves you into the new folder." },
+        { 
+            type: 'command', 
+            cmd: 'touch notes.txt', 
+            path: '~/test_folder',
+            output: '' 
+        },
+        { type: 'comment', text: "TOUCH: Creates an empty file named 'notes.txt'." },
+        { 
+            type: 'command', 
+            cmd: 'echo "Hacking is art" > notes.txt', 
+            path: '~/test_folder',
+            output: '' 
+        },
+        { 
+            type: 'command', 
+            cmd: 'cat notes.txt', 
+            path: '~/test_folder',
+            output: 'Hacking is art' 
+        },
+        { type: 'comment', text: "CAT (Concatenate): Displays the content of a file." },
+        { 
+            type: 'command', 
+            cmd: 'cd ..', 
+            path: '~/test_folder',
+            output: '' 
+        },
+        { 
+            type: 'command', 
+            cmd: 'rm -rf test_folder', 
+            path: '~',
+            output: '' 
+        },
+        { type: 'comment', text: "RM (Remove): '-rf' forces recursive deletion of the folder and its contents." },
+        { type: 'clear' },
+        
+        // --- PART 2: NETWORK ---
+        { type: 'comment', text: "PART 2: NETWORK & IP RECON\nIdentifying interfaces and targets." },
+        { 
+            type: 'command', 
+            cmd: 'ifconfig', 
+            path: '~',
+            output: `eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 192.168.1.15  netmask 255.255.255.0  broadcast 192.168.1.255
+        ether 00:0c:29:bd:0c:12  txqueuelen 1000  (Ethernet)
+        RX packets 1024  bytes 84520 (82.5 KiB)
+        TX packets 800   bytes 56430 (55.1 KiB)
+
+lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0`
+        },
+        { type: 'comment', text: "IFCONFIG: Shows network interface configuration (IP, MAC, Netmask)." },
+        { 
+            type: 'command', 
+            cmd: 'ping -c 3 google.com', 
+            path: '~',
+            output: `PING google.com (142.250.183.46) 56(84) bytes of data.
+64 bytes from lga34s35-in-f14.1e100.net (142.250.183.46): icmp_seq=1 ttl=117 time=12.4 ms
+64 bytes from lga34s35-in-f14.1e100.net (142.250.183.46): icmp_seq=2 ttl=117 time=13.1 ms
+64 bytes from lga34s35-in-f14.1e100.net (142.250.183.46): icmp_seq=3 ttl=117 time=11.9 ms
+
+--- google.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms`
+        },
+        { type: 'comment', text: "PING: Checks connectivity to a host. If it replies, it's alive." },
+        { 
+            type: 'command', 
+            cmd: 'netstat -tuln', 
+            path: '~',
+            output: `Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 0.0.0.0:22              0.0.0.0:* LISTEN     
+tcp        0      0 127.0.0.1:5432          0.0.0.0:* LISTEN     
+udp        0      0 0.0.0.0:68              0.0.0.0:*`
+        },
+        { type: 'comment', text: "NETSTAT: Shows network connections, routing tables, and interface stats.\n'-tuln': TCP, UDP, Listening, Numeric." },
+        
+        // --- PART 3: DNS ---
+        { type: 'clear' },
+        { type: 'comment', text: "PART 3: DNS & DOMAIN RECON\nGathering info about domain names." },
+        { 
+            type: 'command', 
+            cmd: 'nslookup google.com', 
+            path: '~',
+            output: `Server:		192.168.1.1
+Address:	192.168.1.1#53
+
+Non-authoritative answer:
+Name:	google.com
+Address: 142.250.190.46`
+        },
+        { 
+            type: 'command', 
+            cmd: 'whois example.com | head -n 10', 
+            path: '~',
+            output: `   Domain Name: EXAMPLE.COM
+   Registry Domain ID: 2336799_DOMAIN_COM-VRSN
+   Registrar WHOIS Server: whois.verisign-grs.com
+   Registrar URL: http://www.verisign-grs.com
+   Updated Date: 2023-08-14T07:00:00Z
+   Creation Date: 1995-08-14T04:00:00Z
+   Registry Expiry Date: 2024-08-13T04:00:00Z
+   Registrar: RESERVED-Internet Assigned Numbers Authority
+   Registrar IANA ID: 376`
+        },
+        { type: 'comment', text: "WHOIS: Retrieves domain registration details (Owner, Registrar, Expiry)." },
+
+        // --- PART 4: SCANNING ---
+        { type: 'clear' },
+        { type: 'comment', text: "PART 4: SCANNING & PORT RECON\nThe most critical phase: NMAP." },
+        { 
+            type: 'command', 
+            cmd: 'nmap -sS -T4 scanme.nmap.org', 
+            path: '~',
+            output: `Starting Nmap 7.94 ( https://nmap.org ) at 2026-01-07 10:15 EST
+Nmap scan report for scanme.nmap.org (45.33.32.156)
+Host is up (0.045s latency).
+Not shown: 996 closed ports
+PORT      STATE    SERVICE
+22/tcp    <span class="highlight">open</span>     ssh
+80/tcp    <span class="highlight">open</span>     http
+9929/tcp  <span class="highlight">open</span>     nping-echo
+31337/tcp <span class="highlight">open</span>     Elite
+
+Nmap done: 1 IP address (1 host up) scanned in 1.45 seconds`
+        },
+        { type: 'comment', text: "NMAP -sS: SYN Scan (Stealth). Does not complete the TCP handshake.\n-T4: Aggressive timing (faster)." },
+        {
+             type: 'command',
+             cmd: 'nmap -sA 192.168.1.1',
+             path: '~',
+             output: `Starting Nmap 7.94
+Nmap scan report for 192.168.1.1
+PORT     STATE      SERVICE
+80/tcp   unfiltered http
+443/tcp  unfiltered https
+Nmap done: 1 IP address scanned in 0.5s`
+        },
+        { type: 'comment', text: "NMAP -sA: ACK Scan. Used to map firewall rulesets (filtered vs unfiltered), not just open ports." },
+
+        // --- PART 5: WEB RECON ---
+        { type: 'clear' },
+        { type: 'comment', text: "PART 5 & 6: FIREWALL & WEB TECH RECON" },
+        {
+            type: 'command',
+            cmd: 'whatweb scanme.nmap.org',
+            path: '~',
+            output: `http://scanme.nmap.org [200 OK] Apache[2.4.7], Country[US], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.7 (Ubuntu)], IP[45.33.32.156], Title[Go ahead and ScanMe!]`
+        },
+        { type: 'comment', text: "WHATWEB: Identifies CMS, Web Server versions, and frameworks." },
+        {
+            type: 'command',
+            cmd: 'wafw00f https://example.com',
+            path: '~',
+            output: `
+   ______
+  /      \\ 
+ (  WAF  )  WAFW00F - v2.1.0
+  \\      / 
+   \\____/ 
+
+[*] Checking https://example.com
+[+] The site https://example.com is behind Cloudflare (Cloudflare Inc.) WAF.
+[~] Number of requests: 7`
+        },
+        { type: 'comment', text: "WAFW00F: Detects Web Application Firewalls (Cloudflare, AWS, etc.)." },
+        {
+            type: 'command',
+            cmd: 'gobuster dir -u http://192.168.1.15 -w common.txt',
+            path: '~',
+            output: `===============================================================
+Gobuster v3.1.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://192.168.1.15
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                common.txt
+===============================================================
+/admin                (Status: 301) [Size: 312] [--> http://192.168.1.15/admin/]
+/images               (Status: 301) [Size: 313]
+/index.php            (Status: 200) [Size: 4021]
+/robots.txt           (Status: 200) [Size: 21]
+/uploads              (Status: 301) [Size: 314]
+===============================================================`
+        },
+        { type: 'comment', text: "GOBUSTER: Brute-forces hidden directories and files on a web server." },
+
+        // --- PART 8: OSINT ---
+        { type: 'clear' },
+        { type: 'comment', text: "PART 8 & 9: SUBDOMAIN & OSINT" },
+        {
+            type: 'command',
+            cmd: 'theHarvester -d example.com -b google',
+            path: '~',
+            output: `*******************************************************************
+* _   _                                            _             *
+* | |_| |__   ___    /\\  /\\__ _ _ ____   _____  ___| |_ ___ _ __  *
+* | __| '_ \\ / _ \\  / /_/ / _' | '__\\ \\ / / _ \\/ __| __/ _ \\ '__| *
+* | |_| | | |  __/ / __  / (_| | |   \\ V /  __/\\__ \\ ||  __/ |    *
+* \\__|_| |_|\\___| \\/ /_/ \\__,_|_|    \\_/ \\___||___/\\__\\___|_|    *
+*******************************************************************
+
+[*] Target: example.com
+[*] Searching Google...
+
+[*] Emails found:
+------------------
+admin@example.com
+support@example.com
+contact@example.com
+
+[*] Hosts found:
+------------------
+mail.example.com
+vpn.example.com
+dev.example.com`
+        },
+        { type: 'comment', text: "THEHARVESTER: Gathers emails, subdomains, and names from public sources (Google, LinkedIn, etc.)." },
+        
+        { type: 'clear' },
+        { type: 'comment', text: "PRESENTATION COMPLETE.\nThis concludes the basic Kali Linux Reconnaissance guide." },
+        { 
+            type: 'command', 
+            cmd: 'exit', 
+            path: '~',
+            output: 'logout' 
+        }
+    ];
+
+    // -- ENGINE FUNCTIONS --
+
+    function createPrompt(path) {
+        const div = document.createElement('div');
+        div.className = 'prompt-line';
+        div.innerHTML = `
+            <span class="prompt-text">
+                <span class="user">root@kali</span><span class="symbol">:</span><span class="path">${path}</span><span class="symbol">#</span>
+            </span>
+            <span class="command-text"></span>
+            <span class="cursor"></span>
+        `;
+        return div;
+    }
+
+    function createOutput(html) {
+        const div = document.createElement('div');
+        div.className = 'line output';
+        div.innerHTML = html;
+        return div;
+    }
+
+    function createComment(text) {
+        const div = document.createElement('div');
+        div.className = 'line comment';
+        div.innerText = '# ' + text;
+        return div;
+    }
+
+    function scrollToBottom() {
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function executeStep() {
+        if (currentStepIndex >= content.length) return;
+
+        const step = content[currentStepIndex];
+        
+        // Remove previous cursor if exists
+        const prevCursor = document.querySelector('.cursor');
+        if (prevCursor) prevCursor.remove();
+
+        if (step.type === 'clear') {
+            terminal.innerHTML = '';
+            currentStepIndex++;
+            addBlankPrompt(); // Ready for next
+            return;
+        }
+
+        if (step.type === 'comment') {
+            terminal.appendChild(createComment(step.text));
+            currentStepIndex++;
+            scrollToBottom();
+            // Automatically queue next prompt
+            addBlankPrompt(); 
+            return;
+        }
+
+        if (step.type === 'command') {
+            // Create prompt
+            const promptLine = createPrompt(step.path);
+            terminal.appendChild(promptLine);
+            scrollToBottom();
+
+            const cmdSpan = promptLine.querySelector('.command-text');
+            const cursor = promptLine.querySelector('.cursor');
+            cursor.classList.add('typing'); // Stop blinking while typing
+
+            isTyping = true;
+            await typeCommand(step.cmd, cmdSpan);
+            isTyping = false;
+            
+            cursor.classList.remove('typing'); // Blink again
+
+            // Wait a tiny bit then show output
+            setTimeout(() => {
+                if (step.output) {
+                    terminal.appendChild(createOutput(step.output));
+                }
+                currentStepIndex++;
+                scrollToBottom();
+                
+                // Add a blinking cursor at the bottom to show waiting state
+                if (currentStepIndex < content.length) {
+                    const nextStep = content[currentStepIndex];
+                    if(nextStep.type !== 'clear') { 
+                        // If next is clear, we wait for user. 
+                        // If next is content, we essentially pause here.
+                    }
+                }
+            }, 300);
+        }
+    }
+
+    // Typewriter effect
+    function typeCommand(text, element) {
+        return new Promise(resolve => {
+            let i = 0;
+            function typeChar() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    // Random typing variance for realism
+                    const speed = 30 + Math.random() * 50; 
+                    currentTypingTimeout = setTimeout(typeChar, speed);
+                } else {
+                    resolve();
+                }
+                scrollToBottom();
+            }
+            typeChar();
+        });
+    }
+
+    function finishTypingImmediately() {
+        if (!isTyping) return;
+        clearTimeout(currentTypingTimeout);
+        const step = content[currentStepIndex];
+        const prompts = document.querySelectorAll('.prompt-line');
+        const currentPrompt = prompts[prompts.length - 1];
+        const cmdSpan = currentPrompt.querySelector('.command-text');
+        
+        cmdSpan.textContent = step.cmd; // Fill text
+        isTyping = false;
+        
+        // Trigger the output logic immediately
+        setTimeout(() => {
+             if (step.output) {
+                terminal.appendChild(createOutput(step.output));
+            }
+            currentStepIndex++;
+            scrollToBottom();
+        }, 100);
+    }
+
+    function addBlankPrompt() {
+        // Only add if last element isn't already an empty prompt
+        const last = terminal.lastElementChild;
+        // Logic to determine if we need a waiting cursor
+        // For simplicity in this linear presentation, we generate prompts on the fly in executeStep
+        // But for 'waiting' state between commands, we can just leave the last output hanging.
+        
+        // However, to mimic a real shell, usually prompt appears AFTER output.
+        // Let's create a "ghost" prompt for the next step?
+        // Actually, executeStep creates the prompt for the command it is about to run.
+        // So we don't need a blank prompt waiting, unless we are at the very end.
+    }
+
+    // -- INITIALIZATION --
+
+    // Add initial blank prompt
+    const initialPrompt = createPrompt('~');
+    terminal.appendChild(initialPrompt);
+    
+    // Create a fake "start" step to handle the first user interaction gracefully
+    // We replace the initial blank prompt when user presses space
+    
+    // -- EVENT LISTENERS --
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault(); // Prevent scrolling
+
+            if (isTyping) {
+                finishTypingImmediately();
+            } else {
+                // Remove the "waiting" cursor from previous block if it exists
+                const cursors = document.querySelectorAll('.cursor');
+                cursors.forEach(c => c.remove());
+                
+                executeStep();
+            }
+        }
+    });
+
+    // Handle touch for mobile
+    document.addEventListener('touchstart', (e) => {
+        if (isTyping) {
+            finishTypingImmediately();
+        } else {
+            const cursors = document.querySelectorAll('.cursor');
+            cursors.forEach(c => c.remove());
+            executeStep();
+        }
+    });
+
+    // Start prompt focus
+    console.log("Terminal Ready. Press Space.");
+
+</script>
+</body>
+</html>
